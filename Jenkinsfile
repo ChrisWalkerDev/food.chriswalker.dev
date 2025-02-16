@@ -10,32 +10,28 @@ node {
         app = docker.build(appName + ":v" + currentBuild.number)
     }
 
-    stage('Save Image to Archive') {
-        sh "/usr/local/bin/save_image.sh " + appName + ":v" + currentBuild.number
+    stage('Save Image') {
+        sh "~/scripts/save_image.sh " + appName + ":v" + currentBuild.number
     }
-
-    stage('Delete Local Previous Images') {
-        sh "/usr/local/bin/clean_local_images.sh "+ appName
-    }
-
+    
     stage('Delete Previous Archived Images') {
-        sh "/usr/local/bin/delete_old.sh " + appName
+        sh "~/scripts/delete_old.sh " + appName
     }
 
     stage('Delete Remote Existing Container') {
-        sh "/usr/local/bin/stop_previous_image.sh " + appName
+        sh "~/scripts/stop_previous_image.sh ' " + appName + "'"
     }
 
     stage('Delete Remote Images') {
-        sh "/usr/local/bin/clean_remote_images.sh " + appName
+        sh "~/scripts/clean_remote_images.sh " + appName
     }
-
-    stage('Install New Image on Remote') {
-        sh "/usr/local/bin/install_image.sh " + appName + ":v" + currentBuild.number
+    
+    stage('Install New Image on Remote and Move Image to Archive') {
+        sh "~/scripts/install_image.sh " + appName + ":v" + currentBuild.number
     }
 
     stage('Deploy Image') {
-        sh "/usr/local/bin/deploy.sh 9010:8080 " + currentBuild.number + " " + appName + ":v" + currentBuild.number
+        sh "~/scripts/deploy.sh 8510:8080 " + currentBuild.number + " " + appName + ":v" + currentBuild.number
     }
 
     stage('Verify Image') {
